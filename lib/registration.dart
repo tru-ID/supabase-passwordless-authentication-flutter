@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:supabase/supabase.dart';
 import 'package:tru_sdk_flutter/tru_sdk_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter_phonecheck/models.dart';
+import 'package:supabase_flutter_phonecheck/helpers/supabase.dart';
 
 final String baseURL = '<YOUR_LOCAL_TUNNEL_URL>';
 
@@ -123,7 +125,7 @@ class _RegistrationState extends State<Registration> {
               ),
             ),
           ),
-           Container(
+          Container(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 30),
               child: TextField(
@@ -163,7 +165,126 @@ class _RegistrationState extends State<Registration> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 30),
               child: TextButton(
                   onPressed: () async {
-                    
+                    setState(() {
+                      loading = true;
+                    });
+
+                    TruSdkFlutter sdk = TruSdkFlutter();
+
+                    String? reachabilityInfo = await sdk.isReachable();
+
+                    print("-------------REACHABILITTY RESULT --------------");
+                    print(reachabilityInfo);
+                    ReachabilityDetails reachabilityDetails =
+                        json.decode(reachabilityInfo!);
+
+                    if (reachabilityDetails.error?.status == 400) {
+                      setState(() {
+                        loading = false;
+                      });
+                      return errorHandler(context, "Something Went Wrong.",
+                          "Mobile Operator not supported.");
+                    }
+                    bool isPhoneCheckSupported = false;
+
+                    if (reachabilityDetails.error?.status != 412) {
+                      isPhoneCheckSupported = false;
+
+                      for (var products in reachabilityDetails.products!) {
+                        if (products.productName == "Phone Check") {
+                          isPhoneCheckSupported = true;
+                        }
+                      }
+                    } else {
+                      isPhoneCheckSupported = true;
+                    }
+
+                    if (isPhoneCheckSupported) {
+                      final PhoneCheck? phoneCheckResponse =
+                          await createPhoneCheck(phoneNumber!);
+                      if (phoneCheckResponse == null) {
+                        setState(() {
+                          loading = false;
+                        });
+                        return errorHandler(context, 'Something went wrong.',
+                            'Phone number not supported');
+                      }
+                      // open check URL
+
+                      String? result =
+                          await sdk.check(phoneCheckResponse.checkUrl);
+
+                      if (result == null) {
+                        setState(() {
+                          loading = false;
+                        });
+                        return errorHandler(context, "Something went wrong.",
+                            "Failed to open Check URL.");
+                      }
+                      final PhoneCheckResult? phoneCheckResult =
+                          await getPhoneCheck(phoneCheckResponse.checkId);
+
+                      if (phoneCheckResult == null) {
+                        // return dialog
+                        setState(() {
+                          loading = false;
+                        });
+                        return errorHandler(context, 'Something Went Wrong.',
+                            'Please contact support.');
+                      }
+
+                      if (phoneCheckResult.match) {
+                        // proceed with Supabase Auth
+                        GotrueSessionResponse result =
+                            await supabase.auth.signUp(email, password);
+
+                        if (result.error != null) {
+                          setState(() {
+                            loading = false;
+                          });
+
+                          return errorHandler(context, "Something went wrong.",
+                              result.error!.message);
+                        }
+                        if (result.data?.user != null) {
+                          setState(() {
+                            loading = false;
+                          });
+
+                          return successHandler(context);
+                        }
+
+                        return successHandler(context);
+                      } else {
+                        setState(() {
+                          loading = false;
+                        });
+                        return errorHandler(
+                            context,
+                            'Registration Unsuccessful.',
+                            'Please contact your network provider 🙁');
+                      }
+                    } else {
+                      GotrueSessionResponse result =
+                          await supabase.auth.signUp(email, password);
+
+                      if (result.error != null) {
+                        setState(() {
+                          loading = false;
+                        });
+
+                        return errorHandler(context, "Something went wrong.",
+                            result.error!.message);
+                      }
+
+                      if (result.data?.user != null) {
+                        setState(() {
+                          loading = false;
+                        });
+
+                        return successHandler(context);
+                      }
+                    }
                   },
                   child: loading
                       ? const CircularProgressIndicator()
