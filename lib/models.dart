@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-PhoneCheck phoneCheckFromJson(String jsonString) =>
+PhoneCheck phoneCheckFromJSON(String jsonString) =>
     PhoneCheck.fromJson(json.decode(jsonString));
 
 PhoneCheckResult phoneCheckResultFromJSON(String jsonString) =>
