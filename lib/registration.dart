@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:tru_sdk_flutter/tru_sdk_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'models.dart';
+import 'package:supabase_flutter_phonecheck/models.dart';
 
 final String baseURL = '<YOUR_LOCAL_TUNNEL_URL>';
 
@@ -162,7 +162,9 @@ class _RegistrationState extends State<Registration> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 30),
               child: TextButton(
-                  onPressed: () async {},
+                  onPressed: () async {
+                    
+                  },
                   child: loading
                       ? const CircularProgressIndicator()
                       : const Text('Register')),
