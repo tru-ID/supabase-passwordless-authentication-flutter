@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:supabase_flutter_phonecheck/models.dart';
 import 'package:supabase_flutter_phonecheck/helpers/supabase.dart';
 
-final String baseURL = '<YOUR_LOCAL_TUNNEL_URL>';
+final String baseURL = 'https://witty-falcon-83.loca.lt';
 
 class Registration extends StatefulWidget {
   const Registration({Key? key}) : super(key: key);
@@ -36,7 +36,6 @@ Future<PhoneCheckResult?> getPhoneCheck(String checkId) async {
   }
 
   final String data = response.body;
-
   return phoneCheckResultFromJSON(data);
 }
 
@@ -89,152 +88,195 @@ class _RegistrationState extends State<Registration> {
   bool loading = false;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          Container(
-              padding: const EdgeInsets.only(bottom: 45.0),
-              margin: const EdgeInsets.only(top: 50),
-              child: Image.asset(
-                'assets/images/tru-id-logo.png',
-              )),
-          Container(
-              width: double.infinity,
-              child: const Text(
-                'Register.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 30,
-                ),
-              )),
-          Container(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 30),
-              child: TextField(
-                keyboardType: TextInputType.emailAddress,
-                onChanged: (text) {
-                  setState(() {
-                    email = text;
-                  });
-                },
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Enter your email.',
-                ),
-              ),
-            ),
-          ),
-          Container(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 30),
-              child: TextField(
-                keyboardType: TextInputType.text,
-                obscureText: true,
-                onChanged: (text) {
-                  setState(() {
-                    password = text;
-                  });
-                },
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Enter your password.',
-                ),
-              ),
-            ),
-          ),
-          Container(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 30),
-              child: TextField(
-                keyboardType: TextInputType.phone,
-                onChanged: (text) {
-                  setState(() {
-                    phoneNumber = text;
-                  });
-                },
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Enter your phone number.',
-                ),
-              ),
-            ),
-          ),
-          Container(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 30),
-              child: TextButton(
-                  onPressed: () async {
+    return Scaffold(
+      body: Container(
+        child: ListView(
+          children: [
+            Container(
+                padding: const EdgeInsets.only(bottom: 45.0),
+                margin: const EdgeInsets.only(top: 40),
+                child: Image.asset(
+                  'assets/images/tru-id-logo.png',
+                  height: 100,
+                )),
+            Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 20),
+                child: const Text(
+                  'Register.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30,
+                  ),
+                )),
+            Container(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                child: TextField(
+                  keyboardType: TextInputType.emailAddress,
+                  onChanged: (text) {
                     setState(() {
-                      loading = true;
+                      email = text;
                     });
-
-                    TruSdkFlutter sdk = TruSdkFlutter();
-
-                    String? reachabilityInfo = await sdk.isReachable();
-
-                    print("-------------REACHABILITTY RESULT --------------");
-                    print(reachabilityInfo);
-                    ReachabilityDetails reachabilityDetails =
-                        json.decode(reachabilityInfo!);
-
-                    if (reachabilityDetails.error?.status == 400) {
+                  },
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter your email.',
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                child: TextField(
+                  keyboardType: TextInputType.text,
+                  obscureText: true,
+                  onChanged: (text) {
+                    setState(() {
+                      password = text;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter your password.',
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                child: TextField(
+                  keyboardType: TextInputType.phone,
+                  onChanged: (text) {
+                    setState(() {
+                      phoneNumber = text;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter your phone number.',
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                child: TextButton(
+                    onPressed: () async {
                       setState(() {
-                        loading = false;
+                        loading = true;
                       });
-                      return errorHandler(context, "Something Went Wrong.",
-                          "Mobile Operator not supported.");
-                    }
-                    bool isPhoneCheckSupported = false;
 
-                    if (reachabilityDetails.error?.status != 412) {
-                      isPhoneCheckSupported = false;
+                      TruSdkFlutter sdk = TruSdkFlutter();
 
-                      for (var products in reachabilityDetails.products!) {
-                        if (products.productName == "Phone Check") {
-                          isPhoneCheckSupported = true;
+                      String? reachabilityInfo = await sdk.isReachable();
+
+                      print("-------------REACHABILITTY RESULT --------------");
+                      print(reachabilityInfo);
+                      ReachabilityDetails? reachabilityDetails;
+                      if (reachabilityInfo != null) {
+                        reachabilityDetails = json.decode(reachabilityInfo);
+                      }
+
+                      if (reachabilityDetails?.error?.status == 400) {
+                        setState(() {
+                          loading = false;
+                        });
+                        return errorHandler(context, "Something Went Wrong.",
+                            "Mobile Operator not supported.");
+                      }
+                      bool isPhoneCheckSupported = true;
+
+                      if (reachabilityDetails?.error?.status != 412) {
+                        isPhoneCheckSupported = false;
+
+                        for (var products in reachabilityDetails!.products!) {
+                          if (products.productName == "Phone Check") {
+                            isPhoneCheckSupported = true;
+                          }
                         }
-                      }
-                    } else {
-                      isPhoneCheckSupported = true;
-                    }
-
-                    if (isPhoneCheckSupported) {
-                      final PhoneCheck? phoneCheckResponse =
-                          await createPhoneCheck(phoneNumber!);
-                      if (phoneCheckResponse == null) {
-                        setState(() {
-                          loading = false;
-                        });
-                        return errorHandler(context, 'Something went wrong.',
-                            'Phone number not supported');
-                      }
-                      // open check URL
-
-                      String? result =
-                          await sdk.check(phoneCheckResponse.checkUrl);
-
-                      if (result == null) {
-                        setState(() {
-                          loading = false;
-                        });
-                        return errorHandler(context, "Something went wrong.",
-                            "Failed to open Check URL.");
-                      }
-                      final PhoneCheckResult? phoneCheckResult =
-                          await getPhoneCheck(phoneCheckResponse.checkId);
-
-                      if (phoneCheckResult == null) {
-                        // return dialog
-                        setState(() {
-                          loading = false;
-                        });
-                        return errorHandler(context, 'Something Went Wrong.',
-                            'Please contact support.');
+                      } else {
+                        isPhoneCheckSupported = true;
                       }
 
-                      if (phoneCheckResult.match) {
-                        // proceed with Supabase Auth
+                      if (isPhoneCheckSupported) {
+                        final PhoneCheck? phoneCheckResponse =
+                            await createPhoneCheck(phoneNumber);
+                        if (phoneCheckResponse == null) {
+                          setState(() {
+                            loading = false;
+                          });
+                          return errorHandler(context, 'Something went wrong.',
+                              'Phone number not supported');
+                        }
+                        // open check URL
+
+                        String? result =
+                            await sdk.check(phoneCheckResponse.checkUrl);
+
+                        if (result == null) {
+                          setState(() {
+                            loading = false;
+                          });
+                          return errorHandler(context, "Something went wrong.",
+                              "Failed to open Check URL.");
+                        }
+                   
+
+                        final PhoneCheckResult? phoneCheckResult =
+                            await getPhoneCheck(phoneCheckResponse.checkId);
+
+                        if (phoneCheckResult == null) {
+                          // return dialog
+                          setState(() {
+                            loading = false;
+                          });
+                          return errorHandler(context, 'Something Went Wrong.',
+                              'Please contact support.');
+                        }
+
+                        if (phoneCheckResult.match) {
+                          // proceed with Supabase Auth
+                          GotrueSessionResponse result =
+                              await supabase.auth.signUp(email, password);
+
+                          if (result.error != null) {
+                            setState(() {
+                              loading = false;
+                            });
+
+                            return errorHandler(context,
+                                "Something went wrong.", result.error!.message);
+                          }
+                          if (result.data?.user != null) {
+                            setState(() {
+                              loading = false;
+                            });
+
+                            return successHandler(context);
+                          }
+
+                          return successHandler(context);
+                        } else {
+                          setState(() {
+                            loading = false;
+                          });
+                          return errorHandler(
+                              context,
+                              'Registration Unsuccessful.',
+                              'Please contact your network provider 🙁');
+                        }
+                      } else {
+                        print(
+                            "-------------JUST GENUINELY CURIOUS------------");
                         GotrueSessionResponse result =
                             await supabase.auth.signUp(email, password);
 
@@ -246,6 +288,7 @@ class _RegistrationState extends State<Registration> {
                           return errorHandler(context, "Something went wrong.",
                               result.error!.message);
                         }
+
                         if (result.data?.user != null) {
                           setState(() {
                             loading = false;
@@ -253,45 +296,15 @@ class _RegistrationState extends State<Registration> {
 
                           return successHandler(context);
                         }
-
-                        return successHandler(context);
-                      } else {
-                        setState(() {
-                          loading = false;
-                        });
-                        return errorHandler(
-                            context,
-                            'Registration Unsuccessful.',
-                            'Please contact your network provider 🙁');
                       }
-                    } else {
-                      GotrueSessionResponse result =
-                          await supabase.auth.signUp(email, password);
-
-                      if (result.error != null) {
-                        setState(() {
-                          loading = false;
-                        });
-
-                        return errorHandler(context, "Something went wrong.",
-                            result.error!.message);
-                      }
-
-                      if (result.data?.user != null) {
-                        setState(() {
-                          loading = false;
-                        });
-
-                        return successHandler(context);
-                      }
-                    }
-                  },
-                  child: loading
-                      ? const CircularProgressIndicator()
-                      : const Text('Register')),
-            ),
-          )
-        ],
+                    },
+                    child: loading
+                        ? const CircularProgressIndicator()
+                        : const Text('Register')),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
