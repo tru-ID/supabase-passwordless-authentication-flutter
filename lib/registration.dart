@@ -82,10 +82,7 @@ Future<void> successHandler(BuildContext context) {
 }
 
 class _RegistrationState extends State<Registration> {
-  String phoneNumber = '';
-  String email = '';
-  String password = '';
-  bool loading = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,11 +113,6 @@ class _RegistrationState extends State<Registration> {
                     const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                 child: TextField(
                   keyboardType: TextInputType.emailAddress,
-                  onChanged: (text) {
-                    setState(() {
-                      email = text;
-                    });
-                  },
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: 'Enter your email.',
@@ -135,11 +127,6 @@ class _RegistrationState extends State<Registration> {
                 child: TextField(
                   keyboardType: TextInputType.text,
                   obscureText: true,
-                  onChanged: (text) {
-                    setState(() {
-                      password = text;
-                    });
-                  },
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: 'Enter your password.',
@@ -150,157 +137,12 @@ class _RegistrationState extends State<Registration> {
             Container(
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-                child: TextField(
-                  keyboardType: TextInputType.phone,
-                  onChanged: (text) {
-                    setState(() {
-                      phoneNumber = text;
-                    });
-                  },
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Enter your phone number.',
-                  ),
-                ),
-              ),
-            ),
-            Container(
-              child: Padding(
-                padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: TextButton(
                     onPressed: () async {
-                      setState(() {
-                        loading = true;
-                      });
-
-                      TruSdkFlutter sdk = TruSdkFlutter();
-
-                      String? reachabilityInfo = await sdk.isReachable();
-
-                      print("-------------REACHABILITTY RESULT --------------");
-                      print(reachabilityInfo);
-                      ReachabilityDetails? reachabilityDetails;
-                      if (reachabilityInfo != null) {
-                        reachabilityDetails = json.decode(reachabilityInfo);
-                      }
-
-                      if (reachabilityDetails?.error?.status == 400) {
-                        setState(() {
-                          loading = false;
-                        });
-                        return errorHandler(context, "Something Went Wrong.",
-                            "Mobile Operator not supported.");
-                      }
-                      bool isPhoneCheckSupported = true;
-
-                      if (reachabilityDetails?.error?.status != 412) {
-                        isPhoneCheckSupported = false;
-
-                        for (var products in reachabilityDetails!.products!) {
-                          if (products.productName == "Phone Check") {
-                            isPhoneCheckSupported = true;
-                          }
-                        }
-                      } else {
-                        isPhoneCheckSupported = true;
-                      }
-
-                      if (isPhoneCheckSupported) {
-                        final PhoneCheck? phoneCheckResponse =
-                            await createPhoneCheck(phoneNumber);
-                        if (phoneCheckResponse == null) {
-                          setState(() {
-                            loading = false;
-                          });
-                          return errorHandler(context, 'Something went wrong.',
-                              'Phone number not supported');
-                        }
-                        // open check URL
-
-                        String? result =
-                            await sdk.check(phoneCheckResponse.checkUrl);
-
-                        if (result == null) {
-                          setState(() {
-                            loading = false;
-                          });
-                          return errorHandler(context, "Something went wrong.",
-                              "Failed to open Check URL.");
-                        }
-                   
-
-                        final PhoneCheckResult? phoneCheckResult =
-                            await getPhoneCheck(phoneCheckResponse.checkId);
-
-                        if (phoneCheckResult == null) {
-                          // return dialog
-                          setState(() {
-                            loading = false;
-                          });
-                          return errorHandler(context, 'Something Went Wrong.',
-                              'Please contact support.');
-                        }
-
-                        if (phoneCheckResult.match) {
-                          // proceed with Supabase Auth
-                          GotrueSessionResponse result =
-                              await supabase.auth.signUp(email, password);
-
-                          if (result.error != null) {
-                            setState(() {
-                              loading = false;
-                            });
-
-                            return errorHandler(context,
-                                "Something went wrong.", result.error!.message);
-                          }
-                          if (result.data?.user != null) {
-                            setState(() {
-                              loading = false;
-                            });
-
-                            return successHandler(context);
-                          }
-
-                          return successHandler(context);
-                        } else {
-                          setState(() {
-                            loading = false;
-                          });
-                          return errorHandler(
-                              context,
-                              'Registration Unsuccessful.',
-                              'Please contact your network provider 🙁');
-                        }
-                      } else {
-                        print(
-                            "-------------JUST GENUINELY CURIOUS------------");
-                        GotrueSessionResponse result =
-                            await supabase.auth.signUp(email, password);
-
-                        if (result.error != null) {
-                          setState(() {
-                            loading = false;
-                          });
-
-                          return errorHandler(context, "Something went wrong.",
-                              result.error!.message);
-                        }
-
-                        if (result.data?.user != null) {
-                          setState(() {
-                            loading = false;
-                          });
-
-                          return successHandler(context);
-                        }
-                      }
+                    
                     },
-                    child: loading
-                        ? const CircularProgressIndicator()
-                        : const Text('Register')),
+                    child: const Text('Register')),
               ),
             )
           ],
