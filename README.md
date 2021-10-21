@@ -1,4 +1,4 @@
-## SIM Card Based Authentication with Supabase React Native and tru.ID PhoneCheck
+## SIM Card Based Authentication with Supabase Flutter and tru.ID PhoneCheck
 
 ## Requirements
 
