@@ -264,7 +264,7 @@ class _RegistrationState extends State<Registration> {
                             return successHandler(context);
                           }
 
-                          return successHandler(context);
+                         
                         } else {
                           setState(() {
                             loading = false;
@@ -275,8 +275,7 @@ class _RegistrationState extends State<Registration> {
                               'Please contact your network provider 🙁');
                         }
                       } else {
-                        print(
-                            "-------------JUST GENUINELY CURIOUS------------");
+         
                         GotrueSessionResponse result =
                             await supabase.auth.signUp(email, password);
 
