@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase/supabase.dart';
 import 'package:supabase_flutter_phonecheck/helpers/supabase.dart';
 
-final String baseURL = 'https://witty-falcon-83.loca.lt';
+final String baseURL = '<YOUR_LOCALTUNNEL_URL>';
 
 class Registration extends StatefulWidget {
   const Registration({Key? key}) : super(key: key);
