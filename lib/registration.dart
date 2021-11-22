@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:supabase_flutter_phonecheck/models.dart';
 import 'package:supabase_flutter_phonecheck/helpers/supabase.dart';
 
-final String baseURL = '<YOUR_LOCALTUNNEL_URL">';
+final String baseURL = '<YOUR_LOCALTUNNEL_URL>';
 
 class Registration extends StatefulWidget {
   const Registration({Key? key}) : super(key: key);
@@ -23,7 +23,9 @@ Future<PhoneCheck?> createPhoneCheck(String phoneNumber) async {
   if (response.statusCode != 200) {
     return null;
   }
+
   final String data = response.body;
+
   return phoneCheckFromJSON(data);
 }
 
@@ -36,6 +38,7 @@ Future<PhoneCheckResult?> getPhoneCheck(String checkId) async {
   }
 
   final String data = response.body;
+
   return phoneCheckResultFromJSON(data);
 }
 
@@ -86,6 +89,7 @@ class _RegistrationState extends State<Registration> {
   String email = '';
   String password = '';
   bool loading = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -181,12 +185,12 @@ class _RegistrationState extends State<Registration> {
 
                       print("-------------REACHABILITTY RESULT --------------");
                       print(reachabilityInfo);
-                      ReachabilityDetails? reachabilityDetails;
-                      if (reachabilityInfo != null) {
-                        reachabilityDetails = json.decode(reachabilityInfo);
-                      }
 
-                      if (reachabilityDetails?.error?.status == 400) {
+                      ReachabilityDetails reachabilityDetails =
+                          ReachabilityDetails.fromJson(
+                              jsonDecode(reachabilityInfo!));
+
+                      if (reachabilityDetails.error?.status == 400) {
                         setState(() {
                           loading = false;
                         });
@@ -195,10 +199,10 @@ class _RegistrationState extends State<Registration> {
                       }
                       bool isPhoneCheckSupported = true;
 
-                      if (reachabilityDetails?.error?.status != 412) {
+                      if (reachabilityDetails.error?.status != 412) {
                         isPhoneCheckSupported = false;
 
-                        for (var products in reachabilityDetails!.products!) {
+                        for (var products in reachabilityDetails.products!) {
                           if (products.productName == "Phone Check") {
                             isPhoneCheckSupported = true;
                           }
@@ -210,15 +214,17 @@ class _RegistrationState extends State<Registration> {
                       if (isPhoneCheckSupported) {
                         final PhoneCheck? phoneCheckResponse =
                             await createPhoneCheck(phoneNumber);
+
                         if (phoneCheckResponse == null) {
                           setState(() {
                             loading = false;
                           });
+
                           return errorHandler(context, 'Something went wrong.',
                               'Phone number not supported');
                         }
-                        // open check URL
 
+                        // open check URL
                         String? result =
                             await sdk.check(phoneCheckResponse.checkUrl);
 
@@ -226,6 +232,7 @@ class _RegistrationState extends State<Registration> {
                           setState(() {
                             loading = false;
                           });
+
                           return errorHandler(context, "Something went wrong.",
                               "Failed to open Check URL.");
                         }
@@ -238,6 +245,7 @@ class _RegistrationState extends State<Registration> {
                           setState(() {
                             loading = false;
                           });
+
                           return errorHandler(context, 'Something Went Wrong.',
                               'Please contact support.');
                         }
@@ -255,6 +263,7 @@ class _RegistrationState extends State<Registration> {
                             return errorHandler(context,
                                 "Something went wrong.", result.error!.message);
                           }
+
                           if (result.data?.user != null) {
                             setState(() {
                               loading = false;
@@ -266,6 +275,7 @@ class _RegistrationState extends State<Registration> {
                           setState(() {
                             loading = false;
                           });
+
                           return errorHandler(
                               context,
                               'Registration Unsuccessful.',
