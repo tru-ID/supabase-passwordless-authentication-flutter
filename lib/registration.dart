@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:supabase/supabase.dart';
-import 'package:http/http.dart' as http;
 import 'package:supabase_flutter_phonecheck/helpers/supabase.dart';
 
 final String baseURL = 'https://witty-falcon-83.loca.lt';
