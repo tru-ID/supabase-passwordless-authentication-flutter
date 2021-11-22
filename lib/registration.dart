@@ -11,9 +11,7 @@ class Registration extends StatefulWidget {
   _RegistrationState createState() => _RegistrationState();
 }
 
-
 class _RegistrationState extends State<Registration> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,10 +68,7 @@ class _RegistrationState extends State<Registration> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: TextButton(
-                    onPressed: () async {
-                    
-                    },
-                    child: const Text('Register')),
+                    onPressed: () async {}, child: const Text('Register')),
               ),
             )
           ],
