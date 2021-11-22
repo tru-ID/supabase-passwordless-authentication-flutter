@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:supabase_flutter_phonecheck/models.dart';
 import 'package:supabase_flutter_phonecheck/helpers/supabase.dart';
 
-final String baseURL = 'https://witty-falcon-83.loca.lt';
+final String baseURL = '<YOUR_LOCALTUNNEL_URL">';
 
 class Registration extends StatefulWidget {
   const Registration({Key? key}) : super(key: key);
@@ -229,7 +229,6 @@ class _RegistrationState extends State<Registration> {
                           return errorHandler(context, "Something went wrong.",
                               "Failed to open Check URL.");
                         }
-                   
 
                         final PhoneCheckResult? phoneCheckResult =
                             await getPhoneCheck(phoneCheckResponse.checkId);
@@ -263,8 +262,6 @@ class _RegistrationState extends State<Registration> {
 
                             return successHandler(context);
                           }
-
-                         
                         } else {
                           setState(() {
                             loading = false;
@@ -275,7 +272,6 @@ class _RegistrationState extends State<Registration> {
                               'Please contact your network provider 🙁');
                         }
                       } else {
-         
                         GotrueSessionResponse result =
                             await supabase.auth.signUp(email, password);
 
