@@ -7,7 +7,11 @@ import 'package:tru_sdk_flutter/tru_sdk_flutter.dart';
 import 'package:supabase_flutter_phonecheck/models.dart';
 import 'package:http/http.dart' as http;
 
+<<<<<<< HEAD
 final String baseURL = '{YOUR_NGROK_URL}';
+=======
+final String baseURL = '<YOUR_LOCALTUNNEL_URL>';
+>>>>>>> main
 
 class Registration extends StatefulWidget {
   const Registration({Key? key}) : super(key: key);
@@ -16,6 +20,35 @@ class Registration extends StatefulWidget {
   _RegistrationState createState() => _RegistrationState();
 }
 
+<<<<<<< HEAD
+=======
+Future<PhoneCheck?> createPhoneCheck(String phoneNumber) async {
+  final response = await http.post(Uri.parse('$baseURL/phone-check'),
+      body: {"phone_number": phoneNumber});
+
+  if (response.statusCode != 200) {
+    return null;
+  }
+
+  final String data = response.body;
+
+  return phoneCheckFromJSON(data);
+}
+
+Future<PhoneCheckResult?> getPhoneCheck(String checkId) async {
+  final response =
+      await http.get(Uri.parse('$baseURL/phone-check?check_id=$checkId'));
+
+  if (response.statusCode != 200) {
+    return null;
+  }
+
+  final String data = response.body;
+
+  return phoneCheckResultFromJSON(data);
+}
+
+>>>>>>> main
 Future<void> errorHandler(BuildContext context, String title, String content) {
   return showDialog(
       context: context,
@@ -64,6 +97,7 @@ class _RegistrationState extends State<Registration> {
   String password = '';
   bool loading = false;
 
+<<<<<<< HEAD
   Future<PhoneCheckResult> exchangeCode(
       String checkID, String code, String? referenceID) async {
     var body = jsonEncode(<String, String>{
@@ -95,6 +129,8 @@ class _RegistrationState extends State<Registration> {
     }
   }
 
+=======
+>>>>>>> main
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -190,6 +226,7 @@ class _RegistrationState extends State<Registration> {
                           "https://eu.api.tru.id/public/coverage/v0.1/device_ip",
                           false);
 
+<<<<<<< HEAD
                       print("-------------REACHABILITY RESULT --------------");
                       print("isReachable = $reach");
                       bool isPhoneCheckSupported = true;
@@ -213,6 +250,29 @@ class _RegistrationState extends State<Registration> {
 
                         for (var product in coverage.products!) {
                           if (product.name == "Phone Check") {
+=======
+                      print("-------------REACHABILITTY RESULT --------------");
+                      print(reachabilityInfo);
+
+                      ReachabilityDetails reachabilityDetails =
+                          ReachabilityDetails.fromJson(
+                              jsonDecode(reachabilityInfo!));
+
+                      if (reachabilityDetails.error?.status == 400) {
+                        setState(() {
+                          loading = false;
+                        });
+                        return errorHandler(context, "Something Went Wrong.",
+                            "Mobile Operator not supported.");
+                      }
+                      bool isPhoneCheckSupported = true;
+
+                      if (reachabilityDetails.error?.status != 412) {
+                        isPhoneCheckSupported = false;
+
+                        for (var products in reachabilityDetails.products!) {
+                          if (products.productName == "Phone Check") {
+>>>>>>> main
                             isPhoneCheckSupported = true;
                           }
                         }
@@ -221,11 +281,18 @@ class _RegistrationState extends State<Registration> {
                       }
 
                       if (isPhoneCheckSupported) {
+<<<<<<< HEAD
                         final response = await http.post(
                             Uri.parse('$baseURL/v0.2/phone-check'),
                             body: {"phone_number": phoneNumber});
 
                         if (response.statusCode != 200) {
+=======
+                        final PhoneCheck? phoneCheckResponse =
+                            await createPhoneCheck(phoneNumber);
+
+                        if (phoneCheckResponse == null) {
+>>>>>>> main
                           setState(() {
                             loading = false;
                           });
@@ -233,9 +300,25 @@ class _RegistrationState extends State<Registration> {
                           return errorHandler(context, 'Something went wrong.',
                               'Unable to create phone check');
                         }
+<<<<<<< HEAD
 
                         PhoneCheck checkDetails =
                             PhoneCheck.fromJson(jsonDecode(response.body));
+=======
+
+                        // open check URL
+                        String? result =
+                            await sdk.check(phoneCheckResponse.checkUrl);
+
+                        if (result == null) {
+                          setState(() {
+                            loading = false;
+                          });
+
+                          return errorHandler(context, "Something went wrong.",
+                              "Failed to open Check URL.");
+                        }
+>>>>>>> main
 
                         Map result = await sdk.openWithDataCellular(
                             checkDetails.url, false);
@@ -245,10 +328,36 @@ class _RegistrationState extends State<Registration> {
                           setState(() {
                             loading = false;
                           });
+<<<<<<< HEAD
 
                           errorHandler(context, "Something went wrong.",
                               "Failed to open Check URL.");
                         }
+=======
+
+                          return errorHandler(context, 'Something Went Wrong.',
+                              'Please contact support.');
+                        }
+
+                        if (phoneCheckResult.match) {
+                          // proceed with Supabase Auth
+                          GotrueSessionResponse result =
+                              await supabase.auth.signUp(email, password);
+
+                          if (result.error != null) {
+                            setState(() {
+                              loading = false;
+                            });
+
+                            return errorHandler(context,
+                                "Something went wrong.", result.error!.message);
+                          }
+
+                          if (result.data?.user != null) {
+                            setState(() {
+                              loading = false;
+                            });
+>>>>>>> main
 
                         if (result.containsKey("http_status") &&
                             result["http_status"] == 200) {
@@ -309,6 +418,18 @@ class _RegistrationState extends State<Registration> {
                                   "Unable to login. Please try again later");
                             }
                           }
+<<<<<<< HEAD
+=======
+                        } else {
+                          setState(() {
+                            loading = false;
+                          });
+
+                          return errorHandler(
+                              context,
+                              'Registration Unsuccessful.',
+                              'Please contact your network provider 🙁');
+>>>>>>> main
                         }
                       } else {
                         GotrueSessionResponse result =
