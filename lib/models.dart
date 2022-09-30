@@ -1,26 +1,29 @@
 import 'dart:convert';
 
-PhoneCheck phoneCheckFromJSON(String jsonString) =>
-    PhoneCheck.fromJson(json.decode(jsonString));
-
-PhoneCheckResult phoneCheckResultFromJSON(String jsonString) =>
-    PhoneCheckResult.fromJson(json.decode(jsonString));
-
 class PhoneCheck {
-  String checkId;
-  String checkUrl;
+  final String id;
+  final String url;
 
-  PhoneCheck({required this.checkId, required this.checkUrl});
+  PhoneCheck({required this.id, required this.url});
 
-  factory PhoneCheck.fromJson(Map<String, dynamic> json) =>
-      PhoneCheck(checkId: json["check_id"], checkUrl: json["check_url"]);
+  factory PhoneCheck.fromJson(Map<dynamic, dynamic> json) {
+    return PhoneCheck(
+      id: json['check_id'],
+      url: json['check_url'],
+    );
+  }
 }
 
 class PhoneCheckResult {
-  bool match;
+  final String id;
+  bool match = false;
 
-  PhoneCheckResult({required this.match});
+  PhoneCheckResult({required this.id, required this.match});
 
-  factory PhoneCheckResult.fromJson(Map<String, dynamic> json) =>
-      PhoneCheckResult(match: json["match"]);
+  factory PhoneCheckResult.fromJson(Map<dynamic, dynamic> json) {
+    return PhoneCheckResult(
+      id: json['check_id'],
+      match: json['match'] ?? false,
+    );
+  }
 }

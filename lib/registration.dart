@@ -2,12 +2,16 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:supabase/supabase.dart';
-import 'package:tru_sdk_flutter/tru_sdk_flutter.dart';
-import 'package:http/http.dart' as http;
-import 'package:supabase_flutter_phonecheck/models.dart';
 import 'package:supabase_flutter_phonecheck/helpers/supabase.dart';
+import 'package:tru_sdk_flutter/tru_sdk_flutter.dart';
+import 'package:supabase_flutter_phonecheck/models.dart';
+import 'package:http/http.dart' as http;
 
+<<<<<<< HEAD
+final String baseURL = '{YOUR_NGROK_URL}';
+=======
 final String baseURL = '<YOUR_LOCALTUNNEL_URL>';
+>>>>>>> main
 
 class Registration extends StatefulWidget {
   const Registration({Key? key}) : super(key: key);
@@ -16,6 +20,8 @@ class Registration extends StatefulWidget {
   _RegistrationState createState() => _RegistrationState();
 }
 
+<<<<<<< HEAD
+=======
 Future<PhoneCheck?> createPhoneCheck(String phoneNumber) async {
   final response = await http.post(Uri.parse('$baseURL/phone-check'),
       body: {"phone_number": phoneNumber});
@@ -42,6 +48,7 @@ Future<PhoneCheckResult?> getPhoneCheck(String checkId) async {
   return phoneCheckResultFromJSON(data);
 }
 
+>>>>>>> main
 Future<void> errorHandler(BuildContext context, String title, String content) {
   return showDialog(
       context: context,
@@ -90,6 +97,40 @@ class _RegistrationState extends State<Registration> {
   String password = '';
   bool loading = false;
 
+<<<<<<< HEAD
+  Future<PhoneCheckResult> exchangeCode(
+      String checkID, String code, String? referenceID) async {
+    var body = jsonEncode(<String, String>{
+      'code': code,
+      'check_id': checkID,
+      'reference_id': (referenceID != null) ? referenceID : ""
+    });
+
+    final response = await http.post(
+      Uri.parse('$baseURL/v0.2/phone-check/exchange-code'),
+      body: body,
+      headers: <String, String>{
+        'content-type': 'application/json; charset=UTF-8',
+      },
+    );
+    print("response request ${response.request}");
+    if (response.statusCode == 200) {
+      PhoneCheckResult exchangeCheckRes =
+          PhoneCheckResult.fromJson(jsonDecode(response.body));
+      print("Exchange Check Result $exchangeCheckRes");
+      if (exchangeCheckRes.match) {
+        print("✅ successful PhoneCheck match");
+      } else {
+        print("❌ failed PhoneCheck match");
+      }
+      return exchangeCheckRes;
+    } else {
+      throw Exception('Failed to exchange Code');
+    }
+  }
+
+=======
+>>>>>>> main
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -181,8 +222,35 @@ class _RegistrationState extends State<Registration> {
 
                       TruSdkFlutter sdk = TruSdkFlutter();
 
-                      String? reachabilityInfo = await sdk.isReachable();
+                      Map<Object?, Object?> reach = await sdk.openWithDataCellular(
+                          "https://eu.api.tru.id/public/coverage/v0.1/device_ip",
+                          false);
 
+<<<<<<< HEAD
+                      print("-------------REACHABILITY RESULT --------------");
+                      print("isReachable = $reach");
+                      bool isPhoneCheckSupported = true;
+
+                      if (reach.containsKey("http_status") &&
+                          reach["http_status"] != 200) {
+                        if (reach["http_status"] == 400 ||
+                            reach["http_status"] == 412) {
+                          setState(() {
+                            loading = false;
+                          });
+
+                          return errorHandler(context, "Something Went Wrong.",
+                              "Mobile Operator not supported, or not a Mobile IP.");
+                        }
+                      } else if (reach.containsKey("http_status") ||
+                          reach["http_status"] == 200) {
+                        Map body =
+                            reach["response_body"] as Map<dynamic, dynamic>;
+                        Coverage coverage = Coverage.fromJson(body);
+
+                        for (var product in coverage.products!) {
+                          if (product.name == "Phone Check") {
+=======
                       print("-------------REACHABILITTY RESULT --------------");
                       print(reachabilityInfo);
 
@@ -204,6 +272,7 @@ class _RegistrationState extends State<Registration> {
 
                         for (var products in reachabilityDetails.products!) {
                           if (products.productName == "Phone Check") {
+>>>>>>> main
                             isPhoneCheckSupported = true;
                           }
                         }
@@ -212,17 +281,30 @@ class _RegistrationState extends State<Registration> {
                       }
 
                       if (isPhoneCheckSupported) {
+<<<<<<< HEAD
+                        final response = await http.post(
+                            Uri.parse('$baseURL/v0.2/phone-check'),
+                            body: {"phone_number": phoneNumber});
+
+                        if (response.statusCode != 200) {
+=======
                         final PhoneCheck? phoneCheckResponse =
                             await createPhoneCheck(phoneNumber);
 
                         if (phoneCheckResponse == null) {
+>>>>>>> main
                           setState(() {
                             loading = false;
                           });
 
                           return errorHandler(context, 'Something went wrong.',
-                              'Phone number not supported');
+                              'Unable to create phone check');
                         }
+<<<<<<< HEAD
+
+                        PhoneCheck checkDetails =
+                            PhoneCheck.fromJson(jsonDecode(response.body));
+=======
 
                         // open check URL
                         String? result =
@@ -236,15 +318,22 @@ class _RegistrationState extends State<Registration> {
                           return errorHandler(context, "Something went wrong.",
                               "Failed to open Check URL.");
                         }
+>>>>>>> main
 
-                        final PhoneCheckResult? phoneCheckResult =
-                            await getPhoneCheck(phoneCheckResponse.checkId);
+                        Map result = await sdk.openWithDataCellular(
+                            checkDetails.url, false);
+                        print("openWithDataCellular Results -> $result");
 
-                        if (phoneCheckResult == null) {
-                          // return dialog
+                        if (result.containsKey("error")) {
                           setState(() {
                             loading = false;
                           });
+<<<<<<< HEAD
+
+                          errorHandler(context, "Something went wrong.",
+                              "Failed to open Check URL.");
+                        }
+=======
 
                           return errorHandler(context, 'Something Went Wrong.',
                               'Please contact support.');
@@ -268,9 +357,69 @@ class _RegistrationState extends State<Registration> {
                             setState(() {
                               loading = false;
                             });
+>>>>>>> main
 
-                            return successHandler(context);
+                        if (result.containsKey("http_status") &&
+                            result["http_status"] == 200) {
+                          Map body =
+                              result["response_body"] as Map<dynamic, dynamic>;
+                          if (body["code"] != null) {
+                            CheckSuccessBody successBody =
+                                CheckSuccessBody.fromJson(body);
+
+                            try {
+                              PhoneCheckResult exchangeResult =
+                                  await exchangeCode(
+                                      successBody.checkId,
+                                      successBody.code,
+                                      successBody.referenceId);
+
+                              if (exchangeResult.match) {
+                                // proceed with Supabase Auth
+                                GotrueSessionResponse result =
+                                    await supabase.auth.signUp(email, password);
+
+                                if (result.error != null) {
+                                  setState(() {
+                                    loading = false;
+                                  });
+
+                                  return errorHandler(
+                                      context,
+                                      "Something went wrong.",
+                                      result.error!.message);
+                                }
+
+                                if (result.data?.user != null) {
+                                  setState(() {
+                                    loading = false;
+                                  });
+
+                                  return successHandler(context);
+                                }
+                              } else {
+                                setState(() {
+                                  loading = false;
+                                });
+
+                                return errorHandler(
+                                    context,
+                                    "Something went wrong.",
+                                    "Unable to login. Please try again later");
+                              }
+                            } catch (error) {
+                              setState(() {
+                                loading = false;
+                              });
+
+                              return errorHandler(
+                                  context,
+                                  "Something went wrong.",
+                                  "Unable to login. Please try again later");
+                            }
                           }
+<<<<<<< HEAD
+=======
                         } else {
                           setState(() {
                             loading = false;
@@ -280,6 +429,7 @@ class _RegistrationState extends State<Registration> {
                               context,
                               'Registration Unsuccessful.',
                               'Please contact your network provider 🙁');
+>>>>>>> main
                         }
                       } else {
                         GotrueSessionResponse result =
